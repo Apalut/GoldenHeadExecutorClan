@@ -1,0 +1,171 @@
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GoldenHeadExecutor"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+-- Main Frame
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 400, 0, 300)
+Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Visible = true
+Frame.Parent = ScreenGui
+
+-- Image Banner
+local Image = Instance.new("ImageLabel")
+Image.Size = UDim2.new(0, 400, 0, 100)
+Image.Position = UDim2.new(0, 0, 0, 0)
+Image.Image = "rbxassetid://YOUR_IMAGE_ID_HERE"
+Image.BackgroundTransparency = 1
+Image.Parent = Frame
+
+-- TextBox
+local Input = Instance.new("TextBox")
+Input.Size = UDim2.new(0, 380, 0, 140)
+Input.Position = UDim2.new(0, 10, 0, 110)
+Input.PlaceholderText = "-- Type Lua code"
+Input.Text = ""
+Input.TextColor3 = Color3.new(1,1,1)
+Input.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Input.ClearTextOnFocus = false
+Input.Font = Enum.Font.Code
+Input.TextSize = 16
+Input.TextWrapped = true
+Input.TextXAlignment = Enum.TextXAlignment.Left
+Input.TextYAlignment = Enum.TextYAlignment.Top
+Input.MultiLine = true
+Input.Parent = Frame
+
+-- Run Button
+local RunBtn = Instance.new("TextButton")
+RunBtn.Size = UDim2.new(0, 100, 0, 30)
+RunBtn.Position = UDim2.new(0, 20, 1, -40)
+RunBtn.Text = "Run"
+RunBtn.Font = Enum.Font.SourceSansBold
+RunBtn.TextSize = 18
+RunBtn.TextColor3 = Color3.new(1,1,1)
+RunBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+RunBtn.Parent = Frame
+
+-- Clear Button
+local ClearBtn = Instance.new("TextButton")
+ClearBtn.Size = UDim2.new(0, 100, 0, 30)
+ClearBtn.Position = UDim2.new(0.5, -50, 1, -40)
+ClearBtn.Text = "Clear"
+ClearBtn.Font = Enum.Font.SourceSansBold
+ClearBtn.TextSize = 18
+ClearBtn.TextColor3 = Color3.new(1,1,1)
+ClearBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+ClearBtn.Parent = Frame
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 100, 0, 30)
+CloseBtn.Position = UDim2.new(1, -120, 1, -40)
+CloseBtn.Text = "Close"
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.TextSize = 18
+CloseBtn.TextColor3 = Color3.new(1,1,1)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+CloseBtn.Parent = Frame
+
+-- Toggle Button
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 120, 0, 35)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 10)
+ToggleBtn.Text = "GoldenHead GUI"
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 18
+ToggleBtn.TextColor3 = Color3.new(1,1,1)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+ToggleBtn.Parent = ScreenGui
+
+-- Toggle Button Draggable
+local UIS = game:GetService("UserInputService")
+local dragging = false
+local dragInput, dragStart, startPos
+
+ToggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = ToggleBtn.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		ToggleBtn.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- Button Logic
+ClearBtn.MouseButton1Click:Connect(function()
+	Input.Text = ""
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+	Frame.Visible = false
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+	Frame.Visible = not Frame.Visible
+end)
+
+-- Run + GoldenHead Popup
+RunBtn.MouseButton1Click:Connect(function()
+	local code = Input.Text
+	local func, err = loadstring(code)
+
+	if func then
+		pcall(func)
+	else
+		warn("Executor error:", err)
+	end
+
+	-- GoldenHead animated popup
+	local popup = Instance.new("TextLabel")
+	popup.Size = UDim2.new(0, 250, 0, 50)
+	popup.Position = UDim2.new(0.5, -125, 0.1, 0)
+	popup.BackgroundTransparency = 1
+	popup.Text = "GoldenHead"
+	popup.TextColor3 = Color3.fromRGB(255, 215, 0)
+	popup.Font = Enum.Font.GothamBlack
+	popup.TextScaled = true
+	popup.TextStrokeTransparency = 0.5
+	popup.Parent = ScreenGui
+
+	-- Fade out animation
+	task.spawn(function()
+		for i = 1, 25 do
+			popup.TextTransparency = i * 0.04
+			popup.TextStrokeTransparency = 0.5 + i * 0.02
+			task.wait(0.05)
+		end
+		popup:Destroy()
+	end)
+end)
